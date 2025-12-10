@@ -1,2 +1,2 @@
 # NGOL-D
-Nix, Node,Vue,FerretDB DeepSeek Test.
+Nix, Node,Vue,Sqlite3 DeepSeek and Qwen3 Test.
