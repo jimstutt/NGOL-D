@@ -1,0 +1,47 @@
+# ~/Dev/NGOLogisticsD/.github/workflows/ci.yml
+name: NGOLogisticsD CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      ferretdb:
+        image: quay.io/ferretdb/ferretdb:latest
+        ports: [ "27017:27017" ]
+        env:
+          FERRETDB_POSTGRESQL_URL: "host=localhost port=5432 user=postgres password=postgres dbname=ferretdb sslmode=disable"
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Cache Nix store
+        uses: actions/cache@v4
+        with:
+          path: /nix/store
+          key: nix-${{ hashFiles('flake.lock') }}
+
+      - name: Format check (nix fmt)
+        run: |
+          nix fmt --check
+
+      - name: Install & test (with FerretDB)
+        run: |
+          nix develop .#default --command sh -c '
+            npm ci
+            npm test
+          '
+        env:
+          FERRETDB_URI: "mongodb://localhost:27017"

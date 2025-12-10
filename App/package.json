@@ -1,0 +1,22 @@
+{
+  "name": "ngologistics-frontend",
+  "version": "1.0.0",
+  "description": "NGO Logistics Management System Frontend",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.0",
+    "pinia": "^2.1.0",
+    "chart.js": "^4.3.0",
+    "socket.io-client": "^4.7.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.0",
+    "vite": "^4.3.0"
+  }
+}
