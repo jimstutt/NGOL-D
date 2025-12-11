@@ -15,6 +15,10 @@
 </template>
 
 <script>
+import UserModal from '@/components/UserModal.vue';
+import WarehouseModal from '@/components/WarehouseModal.vue';
+import TransportModal from '@/components/TransportModal.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 export default {
   name: 'Admin'
 }

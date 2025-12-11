@@ -143,6 +143,9 @@
 </template>
 
 <script>
+import ShipmentModal from '@/components/ShipmentModal.vue';
+import InventoryModal from '@/components/InventoryModal.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 import { ref, computed } from 'vue'
 import ShipmentModal from '../components/ShipmentModal.vue'
 import InventoryModal from '../components/InventoryModal.vue'
@@ -151,6 +154,9 @@ import ConfirmModal from '../components/ConfirmModal.vue'
 export default {
   name: 'ShipmentsInventory',
   components: {
+ShipmentModal,
+    InventoryModal,
+    ConfirmModal,
     ShipmentModal,
     InventoryModal,
     ConfirmModal
@@ -596,3 +602,26 @@ export default {
   }
 }
 </style>
+
+          <!-- Modals -->
+          <ShipmentModal 
+            v-if="showShipmentModal" 
+            :mode="modalMode" 
+            :shipment="editingShipment"
+            @save="saveShipment"
+            @close="closeShipmentModal"
+          />
+          <InventoryModal 
+            v-if="showInventoryModal" 
+            :mode="modalMode" 
+            :inventory="editingInventory"
+            @save="saveInventory"
+            @close="closeInventoryModal"
+          />
+          <ConfirmModal 
+            v-if="showConfirmModal"
+            :title="confirmTitle"
+            :message="confirmMessage"
+            @confirm="confirmAction"
+            @cancel="cancelConfirm"
+          />

@@ -1,36 +1,47 @@
+# /home/jim/Dev/NGOL-CG/flake.nix
 {
-  description = "NGO Logistics Development Environment";
+  description = "NGOL-CG — Reflex, GHC-WASM, MariaDB";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    ghc-wasm-meta.url = "git+file:///home/jim/Dev/ghc-wasm-meta";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, ghc-wasm-meta }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
     in {
-      homeConfigurations.jim = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [ ./home.nix ];
-      };
-      
-      # Development shell with SQLite
-      devShells.${system}.default = pkgs.mkShell {
+      devShells.default = pkgs.mkShell {
+        name = "ngol-cg";
+        inputsFrom = [ ghc-wasm-meta.devShells.${system}.default ];
         packages = with pkgs; [
-          sqlite    # Only sqlite, not sqlite-interactive
-          nodejs_20
+          reflex
+          reflex-dom
+          mariadb-client
           git
+          tree
+          ripgrep
         ];
-        
         shellHook = ''
-          echo "NGO Logistics Development Environment"
-          echo "SQLite database tools available"
-          export DATABASE_DIR="/home/jim/persist"
-          mkdir -p $DATABASE_DIR
-          echo "Database will be stored at: $DATABASE_DIR/ngo_logistics.db"
+          echo "🚀 NGOL-CG: Reflex + GHC-WASM"
+          ghc --version 2>/dev/null | head -1
+        '';
+      };
+
+      # Build WASM app
+      packages.wasm = pkgs.stdenv.mkDerivation {
+        name = "ngol-cg-wasm";
+        src = ./.;
+        nativeBuildInputs = [ (ghc-wasm-meta.devShells.${system}.default.env.ghc) ];
+        buildPhase = ''
+          HOME=$TMPDIR cabal update
+          HOME=$TMPDIR cabal build --wasm
+        '';
+        installPhase = ''
+          mkdir -p $out/static
+          find dist-newstyle -name "*.wasm" -exec cp {} $out/static/app.wasm \;
+          cp app.js $out/static/ 2>/dev/null || true
         '';
       };
     };

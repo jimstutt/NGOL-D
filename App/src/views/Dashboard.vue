@@ -156,6 +156,7 @@
 </template>
 
 <script>
+import ConfirmModal from '@/components/ConfirmModal.vue';
 import { ref, onMounted } from 'vue'
 import MapView from '../components/MapView.vue'
 import { useShipmentStore } from '../stores/shipment'
@@ -163,6 +164,7 @@ import { useShipmentStore } from '../stores/shipment'
 export default {
   name: 'Dashboard',
   components: {
+ConfirmModal,
     MapView
   },
   setup() {
