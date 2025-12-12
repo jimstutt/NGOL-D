@@ -11,6 +11,8 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      # In flake.nix → outputs
+      start-servers = pkgs.writeShellScriptBin "start-servers" (builtins.readFile ./scripts/start-servers.sh);
     in {
       devShells.default = pkgs.mkShell {
         name = "ngol-cg";
