@@ -1,58 +1,64 @@
 #!/bin/bash
-# start-servers.sh — Nix-native, resilient, logs to files
-set -euo pipefail
-
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$PROJECT_ROOT"
-
-echo "🚀 Starting NGO Logistics (Nix-native mode)..."
+# NGO Logistics Management System - Startup Script (Nix-native)
+# Upgraded from your original: replaces 'node' & 'npm run' with 'nix run'
+echo "🚀 Starting NGO Logistics Management System..."
 echo "=============================================="
-
-# Ensure data dir exists (for SQLite)
-mkdir -p data
-
-# Cleanup
-echo "🔄 Cleaning up..."
-pkill -f 'ngol-backend\|vite' 2>/dev/null || true
-sleep 2
-
-# Launch backend via Nix-built binary
+if [ ! -d "Backend" ] || [ ! -d "App" ]; then
+    echo "❌ Error: Must run from project root with Backend/ and App/ directories"
+    echo "💡 Current directory: $(pwd)"
+    exit 1
+fi
+echo "✅ Running from project root: $(pwd)"
+echo ""
+echo "🔄 Cleaning up existing processes..."
+pkill -f "ngol-backend\|vite" 2>/dev/null || true
+sleep 3
+echo ""
 echo "📦 Starting backend..."
-nix run .#backend > backend.log 2>&1 &
+# ⬇️ REPLACED: node consistent-dashboard.js → nix run .#backend
+nix run .#backend &
 BACKEND_PID=$!
-echo "Backend PID: $BACKEND_PID (log: backend.log)"
-
-# Wait + health-check
-for i in {1..10}; do
-  if curl -sf http://localhost:3000/api/health; then
-    echo -e "\n✅ Backend ready"
-    break
-  fi
-  sleep 2
-  [[ $i -eq 10 ]] && { echo "❌ Backend timeout"; kill $BACKEND_PID 2>/dev/null; exit 1; }
-done
-
-# Launch frontend
+echo "Backend PID: $BACKEND_PID"
+echo "⏳ Waiting for backend to start..."
+sleep 5
+if curl -s http://localhost:3000/api/health > /dev/null; then
+    echo "✅ Backend is running on http://localhost:3000"
+else
+    echo "❌ Backend failed to start on port 3000"
+    kill $BACKEND_PID 2>/dev/null
+    exit 1
+fi
+echo ""
 echo "📦 Starting frontend..."
-nix run .#app > frontend.log 2>&1 &
+# ⬇️ REPLACED: (cd App && npm run dev) → nix run .#app
+nix run .#app &
 FRONTEND_PID=$!
-echo "Frontend PID: $FRONTEND_PID (log: frontend.log)"
-
-# Wait for Vite
-for i in {1..12}; do
-  if curl -sf http://localhost:5173; then
-    echo -e "\n✅ Frontend ready"
-    break
-  fi
-  sleep 3
-  [[ $i -eq 12 ]] && { echo "❌ Frontend timeout"; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit 1; }
-done
-
-echo
-echo "🎯 SYSTEM READY!"
-echo "   🔗 http://localhost:5173"
-echo "   📋 Logs: backend.log, frontend.log"
-echo
-echo "🛑 Press Ctrl+C to stop..."
+echo "Frontend PID: $FRONTEND_PID"
+echo "⏳ Waiting for frontend to start..."
+sleep 8
+if curl -s http://localhost:5173 > /dev/null; then
+    echo "✅ Frontend is running on http://localhost:5173"
+else
+    echo "❌ Frontend failed to start on port 5173"
+    kill $BACKEND_PID $FRONTEND_PID 2>/dev/null
+    exit 1
+fi
+echo ""
+echo "🎯 BOTH SERVERS ARE RUNNING!"
+echo "   Backend:  http://localhost:3000"
+echo "   Frontend: http://localhost:5173"
+echo ""
+echo "📋 Important URLs:"
+echo "   🔧 Backend API: http://localhost:3000/api/health"
+echo "   🖥️  Frontend App: http://localhost:5173"
+echo "   🔐 Login: http://localhost:5173"
+echo ""
+echo "📋 Default Credentials:"
+echo "   Email: ngoadmin@logistics.org"
+echo "   Password: NgoAdmin123!"
+echo ""
+echo "🛑 To stop servers: pkill -f 'ngol-backend\|vite'"
+echo ""
+echo "Press Ctrl+C to stop servers..."
 trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; echo; echo '✅ Stopped.'; exit 0" INT TERM
 wait
