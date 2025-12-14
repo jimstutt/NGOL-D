@@ -1,4 +1,4 @@
-// NGO Logistics Backend - ESM, TypeScript-ready
+// NGO Logistics Backend — ESM, TypeScript-ready
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -15,12 +15,10 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Routes (ESM import — .js extension required)
+// Routes (ESM imports — .js extension required)
 import authRoutes from './routes/auth.js';
 import inventoryRoutes from './routes/inventory.js';
 import shipmentRoutes from './routes/shipments.js';
-
-// Socket.IO
 import { initShipmentSockets } from './sockets/shipmentSockets.js';
 
 const app = express();
@@ -46,11 +44,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shipments', shipmentRoutes);
 
-// Socket.IO real-time updates (spec requirement)
+// Socket.IO (real-time updates — spec requirement)
 initShipmentSockets(server);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, 'localhost', () => {
   console.log(`✅ NGO Logistics Backend running on http://localhost:${PORT}`);
-  console.log(`   🔐 Login first at http://localhost:5173`);
 });
