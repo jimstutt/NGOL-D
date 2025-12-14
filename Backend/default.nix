@@ -2,21 +2,16 @@
 
 let
   node = pkgs.nodejs_20;
-  esbuild = pkgs.esbuild;
 in
 pkgs.stdenv.mkDerivation {
   pname = "ngol-d-backend";
   version = "1.0.0";
   src = ./.;
-  nativeBuildInputs = [ node esbuild pkgs.makeWrapper ];
+  nativeBuildInputs = [ pkgs.makeWrapper node ];
 
   buildPhase = ''
-    # Compile server.ts → server.js (ESM output, no JSX)
-    $ESBUILD server.ts --bundle --platform=node --format=esm --outfile=dist/server.js
-
     mkdir -p $out/lib
     cp -r --no-preserve=mode,ownership . $out/lib/app
-    cp -r dist/* $out/lib/app/
   '';
 
   installPhase = ''

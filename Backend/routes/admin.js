@@ -659,4 +659,4 @@ router.put('/organization', [
 });
 
 module.exports = router;
-export default router;
+module.exports = router;
