@@ -6,7 +6,6 @@ const path = require('path');
 
 const inventoryRoutes = require('./routes/inventory');
 const shipmentRoutes = require('./routes/shipments');
-const donationRoutes = require('./routes/donations');
 
 const app = express();
 
@@ -19,7 +18,6 @@ app.use(express.json());
 // Routes
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shipments', shipmentRoutes);
-app.use('/api/donations', donationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
