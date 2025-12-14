@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const shipmentSchema = new mongoose.Schema({
   trackingNumber: {
@@ -139,4 +139,4 @@ shipmentSchema.methods.updateStatus = async function(newStatus, notes = '') {
 
 const Shipment = mongoose.model('Shipment', shipmentSchema);
 
-export default Shipment;
+} module.exports =  Shipment;

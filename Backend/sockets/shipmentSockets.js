@@ -1,5 +1,5 @@
 // NGO Logistics — Socket.IO Real-time Shipment Updates (ESM)
-import { Server } from 'socket.io';
+const { Server } = require('socket.io');
 
 /**
  * Initialize Socket.IO for real-time shipment tracking
