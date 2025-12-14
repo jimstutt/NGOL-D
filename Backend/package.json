@@ -37,14 +37,20 @@
     "yamljs": "0.3.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/jest": "29.5.8",
+    "@types/node": "^25.0.2",
     "eslint": "8.52.0",
     "jest": "29.7.0",
     "nodemon": "3.0.1",
     "prettier": "3.0.3",
-    "supertest": "6.3.3"
+    "supertest": "6.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=14.0.0"
-  }
+  },
+  "type": "module"
 }
