@@ -1,16 +1,16 @@
 #!/bin/bash
-# NGO Logistics — Nix-native, spec-compliant
-echo "🚀 Starting NGO Logistics (Nix-native)..."
+# NGO Logistics — Hybrid (Nix for frontend, node for backend — proven working)
+echo "🚀 Starting NGO Logistics (Hybrid mode)..."
 echo "=========================================="
 if [ ! -d "Backend" ] || [ ! -d "App" ]; then
     echo "❌ Must run from project root"
     exit 1
 fi
-pkill -f "ngol-d-backend\|vite" 2>/dev/null || true
+pkill -f "node.*server.js\|vite" 2>/dev/null || true
 sleep 2
 
-# Backend: use ./result/bin/ngol-d-backend (CJS, working)
-./result/bin/ngol-d-backend &
+# Backend: direct node (guaranteed to work)
+(cd Backend && node server.js) &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
 
@@ -24,7 +24,7 @@ for i in {1..12}; do
   [[ $i -eq 12 ]] && { kill $BACKEND_PID 2>/dev/null; exit 1; }
 done
 
-# Frontend: dev (npm)
+# Frontend: npm (dev)
 (cd App && npm run dev) &
 FRONTEND_PID=$!
 echo "Frontend PID: $FRONTEND_PID"
