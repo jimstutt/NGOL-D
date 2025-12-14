@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import Login from '../views/Login.vue';
 import Dashboard from '../views/Dashboard.vue';
 import Shipments from '../views/Shipments.vue';
@@ -15,16 +15,16 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 });
 
 // Navigation guard
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('token');
-  if (to.meta.requiresAuth && !isAuthenticated) {
+  const token = localStorage.getItem('token');
+  if (to.meta.requiresAuth && !token) {
     next('/login');
-  } else if (to.path === '/login' && isAuthenticated) {
+  } else if (to.path === '/login' && token) {
     next('/dashboard');
   } else {
     next();
