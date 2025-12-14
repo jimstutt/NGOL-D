@@ -7,11 +7,12 @@ pkgs.stdenv.mkDerivation {
   pname = "ngol-d-backend";
   version = "1.0.0";
   src = ./.;
-  nativeBuildInputs = [ pkgs.makeWrapper node ];
+  nativeBuildInputs = [ pkgs.makeWrapper pkgs.gnutar node ];
 
   buildPhase = ''
     mkdir -p $out/lib
     cp -r --no-preserve=mode,ownership . $out/lib/app
+    tar -xzf ${./node_modules.tar.gz} -C $out/lib/app/
   '';
 
   installPhase = ''
