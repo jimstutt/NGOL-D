@@ -1,15 +1,15 @@
 #!/bin/bash
-# NGO Logistics — Nix-native (no npm/node_modules)
+# NGO Logistics — Nix-native, spec-compliant
 echo "🚀 Starting NGO Logistics (Nix-native)..."
 echo "=========================================="
 if [ ! -d "Backend" ] || [ ! -d "App" ]; then
     echo "❌ Must run from project root"
     exit 1
 fi
-pkill -f "ngol-backend\|caddy" 2>/dev/null || true
+pkill -f "ngol-d-backend\|vite" 2>/dev/null || true
 sleep 2
 
-# Backend via Nix
+# Backend via Nix (CJS, Express 4.18.2)
 nix run .#Backend &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
@@ -24,8 +24,8 @@ for i in {1..12}; do
   [[ $i -eq 12 ]] && { kill $BACKEND_PID 2>/dev/null; exit 1; }
 done
 
-# Frontend: static + Caddy
-nix run .#frontend-prod &
+# Frontend: dev (for now — Nixify later if desired)
+(cd App && npm run dev) &
 FRONTEND_PID=$!
 echo "Frontend PID: $FRONTEND_PID"
 
@@ -39,6 +39,6 @@ for i in {1..10}; do
   [[ $i -eq 10 ]] && { kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit 1; }
 done
 
-echo "🎯 SYSTEM READY — Login first: http://localhost:5173"
+echo "🎯 SYSTEM READY — Login first at http://localhost:5173"
 trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; echo '✅ Stopped.'; exit 0" INT TERM
 wait
