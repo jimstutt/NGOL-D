@@ -1,4 +1,3 @@
-// NGO Logistics Backend — Minimal Working CJS (per NGOLTechSpec.md)
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -14,24 +13,23 @@ app.use(express.json());
 
 // Health check (required by spec)
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
+  res.status(200).json({ status: 'OK', version: '1.0.0' });
 });
 
-// Socket.IO (spec requirement: real-time updates)
-const io = require('socket.io')(server, {
-  cors: { origin: ['http://localhost:5173'] }
-});
-io.on('connection', (socket) => {
-  console.log('✅ Socket.IO client connected');
-  socket.on('disconnect', () => console.log('🔌 Socket.IO client disconnected'));
+// Mock login (spec: ngoadmin@logistics.org / NgoAdmin123!)
+const jwt = require('jsonwebtoken');
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  if (email === 'ngoadmin@logistics.org' && password === 'NgoAdmin123!') {
+    const token = jwt.sign({ email, role: 'admin' }, 'dev-secret', { expiresIn: '1h' });
+    res.json({ token, user: { email, role: 'admin' } });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
+// Start
+const PORT = 3000;
 server.listen(PORT, 'localhost', () => {
-  console.log(`✅ NGO Logistics Backend running on http://localhost:${PORT}`);
+  console.log(`✅ Backend running on http://localhost:${PORT}`);
 });
