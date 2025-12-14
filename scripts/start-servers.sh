@@ -13,6 +13,7 @@ pkill -f vite 2>/dev/null || true
 sleep 2
 
 # Start Backend (direct node — verified working)
+echo "📦 Starting backend..."
 (cd Backend && node server.js) &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
@@ -29,6 +30,7 @@ for i in {1..12}; do
 done
 
 # Start Frontend
+echo "📦 Starting frontend..."
 (cd App && npm run dev) &
 FRONTEND_PID=$!
 echo "Frontend PID: $FRONTEND_PID"
