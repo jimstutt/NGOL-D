@@ -9,8 +9,8 @@ fi
 pkill -f "ngol-d-backend\|vite" 2>/dev/null || true
 sleep 2
 
-# Backend via Nix (CJS, Express 4.18.2)
-nix run .#Backend &
+# Backend: use ./result/bin/ngol-d-backend (CJS, working)
+./result/bin/ngol-d-backend &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
 
@@ -24,7 +24,7 @@ for i in {1..12}; do
   [[ $i -eq 12 ]] && { kill $BACKEND_PID 2>/dev/null; exit 1; }
 done
 
-# Frontend: dev (for now — Nixify later if desired)
+# Frontend: dev (npm)
 (cd App && npm run dev) &
 FRONTEND_PID=$!
 echo "Frontend PID: $FRONTEND_PID"
