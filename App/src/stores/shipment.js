@@ -429,3 +429,17 @@ export const useShipmentStore = defineStore('shipment', () => {
     initializeData
   }
 })
+
+// Real-time updates (per NGOLTechSpec.md)
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000'); // matches Backend port
+
+socket.on('shipmentUpdated', (shipment) => {
+  const index = state.shipments.findIndex(s => s.id === shipment.id);
+  if (index !== -1) {
+    state.shipments.splice(index, 1, shipment);
+  } else {
+    state.shipments.push(shipment);
+  }
+});
