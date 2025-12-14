@@ -1,50 +1,56 @@
-# /home/jim/Dev/NGOL-CG/flake.nix
 {
-  description = "NGOL-CG — Reflex, GHC-WASM, MariaDB";
+  description = "NGO Logistics Dashboard (Node.js + SQLite + Vue)";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
-    ghc-wasm-meta.url = "git+file:///home/jim/Dev/ghc-wasm-meta";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, ghc-wasm-meta }:
-    let
-      system = "x86_64-linux";
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+  }:
+    flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      # In flake.nix → outputs
-      start-servers = pkgs.writeShellScriptBin "start-servers" (builtins.readFile ./scripts/start-servers.sh);
+
+      # Backend (Nixified)
+      backend = pkgs.callPackage ./Backend/default.nix { inherit pkgs; };
+
+      # Frontend (App/)
+      frontend = pkgs.callPackage ./App { inherit pkgs; };
+
     in {
+      # nix build .#Backend
+      packages.Backend = backend;
+
+      # nix build .#frontend → static site
+      packages.frontend = frontend.default;
+
+      # nix run .#Backend
+      apps.Backend = {
+        type = "app";
+        program = "${backend}/bin/ngol-backend";
+      };
+
+      # nix run .#frontend-prod
+      apps.frontend-prod = {
+        type = "app";
+        program = "${frontend.serve}/bin/serve-prod";
+      };
+
+      # nix develop → full stack dev
       devShells.default = pkgs.mkShell {
-        name = "ngol-cg";
-        inputsFrom = [ ghc-wasm-meta.devShells.${system}.default ];
-        packages = with pkgs; [
-          reflex
-          reflex-dom
-          mariadb-client
-          git
-          tree
-          ripgrep
-        ];
+        packages = [ pkgs.nodejs_20 pkgs.yarn pkgs.sqlite pkgs.curl ];
         shellHook = ''
-          echo "🚀 NGOL-CG: Reflex + GHC-WASM"
-          ghc --version 2>/dev/null | head -1
+          echo "✅ NGO Logistics Dev Shell"
+          echo "   Backend: cd Backend && node server.js"
+          echo "   Frontend: cd App && npm run dev"
+          echo "   Full stack: ./scripts/start-servers.sh"
         '';
       };
 
-      # Build WASM app
-      packages.wasm = pkgs.stdenv.mkDerivation {
-        name = "ngol-cg-wasm";
-        src = ./.;
-        nativeBuildInputs = [ (ghc-wasm-meta.devShells.${system}.default.env.ghc) ];
-        buildPhase = ''
-          HOME=$TMPDIR cabal update
-          HOME=$TMPDIR cabal build --wasm
-        '';
-        installPhase = ''
-          mkdir -p $out/static
-          find dist-newstyle -name "*.wasm" -exec cp {} $out/static/app.wasm \;
-          cp app.js $out/static/ 2>/dev/null || true
-        '';
-      };
-    };
+      # nix develop .#frontend
+      devShells.frontend = frontend.devShell;
+    });
 }
