@@ -12,13 +12,14 @@ pkill -f "node.*server.js" 2>/dev/null || true
 pkill -f vite 2>/dev/null || true
 sleep 2
 
-# Start Backend
-echo "📦 Starting backend..."
+# Start Backend — verified working
+echo "📦 Starting backend (node server.js)..."
 (cd Backend && node server.js) &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
 
-# Wait + health check
+# Wait for backend
+echo "⏳ Waiting for backend..."
 for i in {1..12}; do
   if timeout 1s curl -sf http://localhost:3000/api/health >/dev/null 2>&1; then
     echo "✅ Backend up on :3000"
@@ -29,12 +30,13 @@ for i in {1..12}; do
 done
 
 # Start Frontend
-echo "📦 Starting frontend..."
+echo "📦 Starting frontend (npm run dev)..."
 (cd App && npm run dev) &
 FRONTEND_PID=$!
 echo "Frontend PID: $FRONTEND_PID"
 
-# Wait + frontend check
+# Wait for frontend
+echo "⏳ Waiting for frontend..."
 for i in {1..10}; do
   if timeout 1s curl -sf http://localhost:5173 >/dev/null 2>&1; then
     echo "✅ Frontend up on :5173"
