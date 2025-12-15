@@ -1,49 +1,36 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
+// NGO Logistics — Minimal, robust Vue 3 entry (spec-compliant)
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { createRouter, createWebHashHistory } from 'vue-router';
 
-console.log('🎯 Starting Vue app initialization...')
+// Components
+import App from './App.vue';
+import Login from './views/Login.vue';
+import Dashboard from './views/Dashboard.vue';
 
-try {
-  // Create app instance
-  const app = createApp(App)
-  console.log('✅ Vue app instance created')
+// Pinia store
+const pinia = createPinia();
 
-  // Initialize Pinia FIRST
-  const pinia = createPinia()
-  app.use(pinia)
-  console.log('✅ Pinia store initialized')
+// Router (Login.vue first — per spec)
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    { path: '/', redirect: '/login' },
+    { path: '/login', name: 'Login', component: Login },
+    { path: '/dashboard', name: 'Dashboard', component: Dashboard }
+  ]
+});
 
-  // Try to import and use router
-  let router
-  try {
-    router = await import('./router/index.js')
-    app.use(router.default)
-    console.log('✅ Vue Router initialized')
-  } catch (routerError) {
-    console.warn('⚠️ Vue Router not available:', routerError.message)
-    console.log('ℹ️ App will run without routing')
-  }
+// App
+const app = createApp(App);
 
-  // Mount the app
-  app.mount('#app')
-  console.log('✅ Vue app mounted successfully!')
-  
-} catch (error) {
-  console.error('❌ Vue app initialization failed:', error)
-  
-  // Show error in UI
-  const appElement = document.getElementById('app')
-  if (appElement) {
-    appElement.innerHTML = `
-      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #f8d7da; color: #721c24; padding: 20px; text-align: center;">
-        <div>
-          <h2>🚨 Application Error</h2>
-          <p>Failed to initialize application:</p>
-          <pre style="background: white; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: left;">${error.message}</pre>
-          <p>Check browser console for details.</p>
-        </div>
-      </div>
-    `
-  }
-}
+app.use(pinia);
+app.use(router);
+
+// Mount only after router is ready
+router.isReady().then(() => {
+  app.mount('#app');
+  console.log('✅ Vue app mounted successfully — Login.vue first');
+}).catch(err => {
+  console.error('❌ Router init failed:', err);
+});

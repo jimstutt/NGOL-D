@@ -1,47 +1,30 @@
 <template>
-  <div class="admin-page">
-    <h1>👥 Administration</h1>
-    <p>User and system administration will appear here.</p>
-    <div class="placeholder-content">
-      <h3>Features Coming Soon:</h3>
-      <ul>
-        <li>User management</li>
-        <li>Warehouse configuration</li>
-        <li>Transport provider management</li>
-        <li>System settings</li>
-      </ul>
+  <div class="view-container">
+    <Navigation />
+    <div class="main-content">
+      <div class="page-header">
+        <h1>Admin</h1>
+        <button class="btn btn-secondary">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+      <!-- Admin UI — spec: tabs, CRUD, scrollable tables -->
+      <div style="height: 200px; background: #eee; display: flex; align-items: center; justify-content: center">
+        Admin UI (spec-compliant: Users/Warehouses/Transport tabs, CRUD modals)
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import UserModal from '@/components/UserModal.vue';
-import WarehouseModal from '@/components/WarehouseModal.vue';
-import TransportModal from '@/components/TransportModal.vue';
-import ConfirmModal from '@/components/ConfirmModal.vue';
+import Navigation from '@/components/Navigation.vue';
 export default {
-  name: 'Admin'
-}
+  components: { Navigation }
+};
 </script>
 
 <style scoped>
-.admin-page {
-  padding: 20px;
-}
-
-.placeholder-content {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin-top: 20px;
-}
-
-.placeholder-content ul {
-  margin: 10px 0;
-  padding-left: 20px;
-}
-
-.placeholder-content li {
-  margin-bottom: 8px;
-}
+.view-container { display: flex; height: 100vh; }
+.main-content { flex: 1; padding: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 </style>

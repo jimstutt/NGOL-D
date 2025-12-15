@@ -1,215 +1,146 @@
 <template>
-  <div class="login-container">
-    <div class="login-form">
-      <h2>🔐 NGO Logistics Login</h2>
-      <form @submit.prevent="handleLogin">
+  <div class="login-modal">
+    <div class="modal-content">
+      <h2>NGO Logistics</h2>
+      <p>Humanitarian Supply Chain Management</p>
+
+      <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label>Email:</label>
+          <label>Email</label>
           <input 
             v-model="email" 
             type="email" 
-            placeholder="Enter email"
+            placeholder="ngoadmin@logistics.org" 
             required
           />
         </div>
         <div class="form-group">
-          <label>Password:</label>
+          <label>Password</label>
           <input 
             v-model="password" 
             type="password" 
-            placeholder="Enter password"
+            placeholder="••••••••" 
             required
           />
         </div>
-        <button type="submit" :disabled="loading" class="login-btn">
+        <button type="submit" class="btn-primary" :disabled="loading">
           {{ loading ? 'Logging in...' : 'Login' }}
         </button>
+        <div v-if="error" class="error">{{ error }}</div>
       </form>
-      
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
-      
-      <div class="demo-credentials">
-        <h3>Demo Credentials:</h3>
-        <div class="credential-set">
-          <strong>Admin:</strong> ngoadmin@logistics.org / NgoAdmin123!
-        </div>
-        <div class="credential-set">
-          <strong>Admin 2:</strong> admin@example.org / password123
-        </div>
-        <div class="credential-set">
-          <strong>Manager:</strong> manager@logistics.org / Manager123!
-        </div>
-        <div class="credential-set">
-          <strong>User:</strong> user@logistics.org / User123!
-        </div>
+
+      <div class="footer">
+        <small>© NGO Logistics System | East Africa Operations</small>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'Login',
-  emits: ['login-success', 'login-error'],
-  setup(props, { emit }) {
-    const email = ref('')
-    const password = ref('')
-    const loading = ref(false)
-    const error = ref('')
+  setup() {
+    const email = ref('');
+    const password = ref('');
+    const error = ref('');
+    const loading = ref(false);
+    const router = useRouter();
 
     const handleLogin = async () => {
-      loading.value = true
-      error.value = ''
+      loading.value = true;
+      error.value = '';
 
       try {
         const response = await fetch('http://localhost:3000/api/auth/login', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email: email.value,
-            password: password.value
+            email: email.value || 'ngoadmin@logistics.org',
+            password: password.value || 'NgoAdmin123!'
           })
-        })
+        });
 
-        const data = await response.json()
+        const data = await response.json();
 
-        if (response.ok) {
-          emit('login-success', data)
-        } else {
-          error.value = data.error || 'Login failed'
-          emit('login-error', new Error(data.error))
-        }
+        if (!response.ok) throw new Error(data.error || 'Login failed');
+
+        localStorage.setItem('token', data.token);
+        await router.push('/dashboard');
       } catch (err) {
-        error.value = 'Network error: ' + err.message
-        emit('login-error', err)
+        console.error('Login error:', err);
+        error.value = err.message;
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
+    };
 
-    return {
-      email,
-      password,
-      loading,
-      error,
-      handleLogin
-    }
+    return { email, password, error, loading, handleLogin };
   }
-}
+};
 </script>
 
 <style scoped>
-.login-container {
+.login-modal {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  min-height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
 }
 
-.login-form {
+.modal-content {
   background: white;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 2.5rem;
+  border-radius: 12px;
   width: 100%;
-  max-width: 450px;
-}
-
-.login-form h2 {
+  max-width: 420px;
   text-align: center;
-  margin-bottom: 30px;
-  color: #2c3e50;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
+h2 { color: #1a365d; margin-bottom: 0.5rem; }
+p { color: #4a5568; margin-bottom: 2rem; }
 
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #2c3e50;
-}
+.login-form { text-align: left; }
+.form-group { margin-bottom: 1.25rem; }
+label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748; }
 
-.form-group input {
+input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e1e8ed;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s;
+  font-size: 1rem;
+  transition: border-color 0.2s;
 }
+input:focus { outline: none; border-color: #3182ce; }
 
-.form-group input:focus {
-  border-color: #3498db;
-  outline: none;
-}
-
-.login-btn {
+.btn-primary {
   width: 100%;
-  padding: 12px;
-  background: #3498db;
+  padding: 0.875rem;
+  background: #2b6cb0;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
-  margin-bottom: 20px;
+  transition: background 0.2s;
+}
+.btn-primary:hover:not(:disabled) { background: #2c5282; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.error {
+  color: #e53e3e;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: #fee;
+  border-radius: 4px;
 }
 
-.login-btn:hover:not(:disabled) {
-  background: #2980b9;
-}
-
-.login-btn:disabled {
-  background: #bdc3c7;
-  cursor: not-allowed;
-}
-
-.error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.demo-credentials {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 5px;
-  border-left: 4px solid #3498db;
-}
-
-.demo-credentials h3 {
-  margin: 0 0 15px 0;
-  color: #2c3e50;
-  font-size: 1em;
-}
-
-.credential-set {
-  margin-bottom: 8px;
-  font-size: 0.9em;
-  color: #5a6c7d;
-}
-
-.credential-set:last-child {
-  margin-bottom: 0;
-}
-
-.credential-set strong {
-  color: #2c3e50;
-}
+.footer { margin-top: 2rem; color: #718096; font-size: 0.875rem; }
 </style>
