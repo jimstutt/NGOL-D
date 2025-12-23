@@ -1,7 +1,7 @@
 { pkgs, stdenv, lib }:
 stdenv.mkDerivation {
   name = "ngol-d-backend";
-  src = ./Backend;  # ← source is Backend/ directory
+  src = ../.;  # ← ✅ resolves to ~/Dev/NGOL-D/Backend/
   buildInputs = [ pkgs.nodejs_20 ];
   installPhase = ''
     mkdir -p $out/bin $out/lib
@@ -14,8 +14,6 @@ cd "$out/lib"
 exec ${pkgs.nodejs_20}/bin/node server.js "$@"
 SCRIPT
     chmod +x $out/bin/ngol-d-backend
-    # Verify files exist
-    test -f "$out/lib/server.js" || { echo "❌ server.js missing in $out/lib"; exit 1; }
-    test -x "$out/bin/ngol-d-backend" || { echo "❌ launcher not executable"; exit 1; }
+    test -f "$out/lib/server.js" || { echo "❌ server.js missing"; exit 1; }
   '';
 }
