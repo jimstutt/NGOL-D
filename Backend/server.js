@@ -24,3 +24,12 @@ const io = setupSocket(server);
 server.listen(PORT, () => {
   console.log(`✅ Backend listening on http://localhost:${PORT}`);
 });
+
+// Auto-migrate if --migrate
+if (process.argv.includes('--migrate')) {
+  const { execSync } = require('child_process');
+  console.log('🔧 Auto-migrating schema...');
+  execSync('node migrate.js', { stdio: 'inherit', cwd: __dirname });
+  console.log('✅ Migration complete. Exiting.');
+  process.exit(0);
+}

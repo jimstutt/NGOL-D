@@ -1,0 +1,29 @@
+# Hardened MariaDB config for Ubuntu (TLS, roles, security)
+# Place in /etc/mysql/conf.d/ngol-d.cnf in prod
+
+[mysqld]
+# Security
+skip-show-database
+local-infile = OFF
+secure-file-priv = ""
+symbolic-links = 0
+sql-mode = STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+
+# Authentication
+default-authentication-plugin = mysql_native_password
+
+# TLS (set paths in prod)
+# ssl-cert = /etc/ssl/ngol-d/server-cert.pem
+# ssl-key = /etc/ssl/ngol-d/server-key.pem
+# ssl-ca = /etc/ssl/ngol-d/ca.pem
+# require-secure-transport = ON
+
+# Logging
+log-error = /var/log/mysql/ngol-d.log
+slow-query-log = 1
+slow-query-log-file = /var/log/mysql/ngol-d-slow.log
+long_query_time = 2
+
+# Performance
+innodb_buffer_pool_size = 256M
+max_connections = 50
