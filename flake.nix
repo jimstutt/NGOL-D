@@ -1,11 +1,9 @@
 {
-  description = "NGO Logistics Dashboard (Node.js + SQLite + Vue)";
-
+  description = "NGO Logistics Dashboard (Node.js + MariaDB + Vue)";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
-
   outputs = {
     self,
     nixpkgs,
@@ -13,44 +11,40 @@
   }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-
-      # Backend (Nixified)
       backend = pkgs.callPackage ./Backend/default.nix { inherit pkgs; };
-
-      # Frontend (App/)
-      frontend = pkgs.callPackage ./App { inherit pkgs; };
-
+      app = pkgs.callPackage ./App { inherit pkgs; };
     in {
-      # nix build .#Backend
+      # nix build .#App .#Backend
+      packages.App = app.default;
       packages.Backend = backend;
 
-      # nix build .#frontend → static site
-      packages.frontend = frontend.default;
+      # nix run .#App-prod
+      apps.App-prod = {
+        type = "app";
+        program = "${app.serve}/bin/serve-prod";
+      };
 
       # nix run .#Backend
       apps.Backend = {
         type = "app";
-        program = "${backend}/bin/ngol-backend";
+        program = "${backend}/bin/ngol-d-backend";
       };
 
-      # nix run .#frontend-prod
-      apps.frontend-prod = {
+      # nix run .#check (integration tests)
+      apps.check = {
         type = "app";
-        program = "${frontend.serve}/bin/serve-prod";
+        program = toString ./scripts/check.js;
       };
 
-      # nix develop → full stack dev
+      # nix develop
       devShells.default = pkgs.mkShell {
-        packages = [ pkgs.nodejs_20 pkgs.yarn pkgs.sqlite pkgs.curl ];
+        packages = [ pkgs.nodejs_20 pkgs.mariadb pkgs.curl ];
         shellHook = ''
-          echo "✅ NGO Logistics Dev Shell"
+          echo "✅ NGOL-D Dev Shell"
           echo "   Backend: cd Backend && node server.js"
           echo "   Frontend: cd App && npm run dev"
           echo "   Full stack: ./scripts/start-servers.sh"
         '';
       };
-
-      # nix develop .#frontend
-      devShells.frontend = frontend.devShell;
     });
 }

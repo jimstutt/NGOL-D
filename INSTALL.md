@@ -6,7 +6,7 @@
 
 ### System Requirements
 - **Node.js**: Version 14.0 or higher
-- **SQLite3**: Version 3.31 or higher
+- **MariaDB3**: Version 3.31 or higher
 - **npm**: Version 6.0 or higher
 - **Google Maps API Key**: With Maps JavaScript API enabled
 
@@ -27,13 +27,13 @@ sudo apt update
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Install SQLite3
-sudo apt-get install sqlite3
+# Install MariaDB3
+sudo apt-get install mariadb3
 
 # Verify installation
 node --version
 npm --version
-sqlite3 --version
+mariadb3 --version
 
 ## Prerequisites
 
