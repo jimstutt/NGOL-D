@@ -52,7 +52,7 @@ const handleLogin = async () => {
 loading.value = true;
 error.value = '';
 try {
-  const url = 'http://localhost:3001' + '/api/auth/login';
+  const url = import.meta.env.VITE_API_URL + '/api/auth/login';
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -106,9 +106,6 @@ input {
 }
 input:focus { outline: none; border-color: #3182ce; }
 .credentials-hint {
-  white-space: pre;
-  font-family: monospace;
-  padding-left: 0;
   margin-bottom: 1.25rem;
   font-size: 0.9rem;
   color: #4a5568;

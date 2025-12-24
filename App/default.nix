@@ -1,33 +1,31 @@
-{ pkgs }:
+{ pkgs ? import <nixpkgs> {} }:
 
-let
-  nodejs = pkgs.nodejs_20;
+pkgs.stdenv.mkDerivation {
+  name = "ngol-d-frontend";
+  version = "1.0.0";
+  src = ./.;
 
-  static = pkgs.stdenv.mkDerivation {
-    pname = "ngol-frontend";
-    version = "1.0.0";
-    src = ./.;
+  buildInputs = [
+    pkgs.nodejs_20
+    pkgs.yarn
+  ];
 
-    nativeBuildInputs = [ nodejs ];
-
-    buildPhase = ''
-      export HOME=$TMPDIR
-      # Allow network — Nix builds are sandboxed but can fetch
-      npm ci --no-audit --no-fund --ignore-scripts --no-bin-links
-      npm run build
-    '';
-
-    installPhase = ''
-      mkdir -p $out
-      cp -r dist/* $out/
-    '';
-  };
-
-  serve = pkgs.writeShellScriptBin "serve-prod" ''
-    exec ${pkgs.caddy}/bin/caddy file-server --root ${static} --listen :5173
+  buildPhase = ''
+    runHook preBuild
+    yarn install --frozen-lockfile --offline
+    VITE_GOOGLE_MAPS_API_KEY="AIzaSyBTmKzNwMM1OIruKtneSGHYUYbJHMUL6j0" \
+    VITE_API_URL="http://localhost:5000" \
+      yarn run build
+    runHook postBuild
   '';
 
-in {
-  default = static;
-  serve = serve;
+  installPhase = ''
+    runHook preInstall
+    mkdir -p $out
+    cp -r dist/* $out/
+    runHook postInstall
+  '';
+
+  dontPatchELF = true;
+  dontStrip = true;
 }

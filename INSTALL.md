@@ -1,55 +1,40 @@
-# NGOLogisticsD/INSTALL.md
+# NGOL-D Installation — Ubuntu + Home-Manager
 
-# Installation Guide
+## 1. Install Nix
+sh <(curl -L https://nixos.org/nix/install) --no-daemon
+mkdir -p ~/.config/nix
+echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
-## Prerequisites
+## 2. Install Home-Manager
+nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager -- switch --flake .#$(whoami)"
 
-### System Requirements
-- **Node.js**: Version 14.0 or higher
-- **MariaDB3**: Version 3.31 or higher
-- **npm**: Version 6.0 or higher
-- **Google Maps API Key**: With Maps JavaScript API enabled
+## 3. MariaDB
+sudo apt update && sudo apt install mariadb-server
+sudo systemctl enable --now mariadb
+sudo mysql_secure_installation
 
-### Required Accounts
-- Google Cloud Platform account for Maps API
-- (Optional) Cloud database service account
+## 4. DB Setup
+sudo mysql -e "
+  CREATE DATABASE IF NOT EXISTS ngol_d;
+  CREATE USER IF NOT EXISTS 'ngol'@'localhost' IDENTIFIED BY 'ngol-secret';
+  GRANT ALL PRIVILEGES ON ngol_d.* TO 'ngol'@'localhost';
+  FLUSH PRIVILEGES;
+"
 
-## Platform-Specific Installation
+## 5. Build
+git clone https://github.com/jimstutt/NGOL-D.git ~/Dev/NGOL-D
+cd ~/Dev/NGOL-D
+git add . && git commit -m "build" || true
+nix build .#ngol-d-backend .#ngol-d-frontend
 
-### Linux Installation
+## 6. Home-Manager Config
+# Add to ~/.config/home-manager/home.nix:
+#   imports = [ ./ngol-d-service.nix ];
 
-#### Ubuntu/Debian
-```bash
-# Update package list
-sudo apt update
+## 7. Deploy
+home-manager switch
+systemctl --user daemon-reload
+systemctl --user enable --now ngol-d-backend
 
-# Install Node.js
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Install MariaDB3
-sudo apt-get install mariadb3
-
-# Verify installation
-node --version
-npm --version
-mariadb3 --version
-
-## Prerequisites
-
-### System Requirements
-- **Node.js**: Version 14.0 or higher
-- **MongoDB**: Version 4.4 or higher
-- **npm**: Version 6.0 or higher
-- **Google Maps API Key**: With Maps JavaScript API enabled
-
-### Required Accounts
-- Google Cloud Platform account for Maps API
-- MongoDB Atlas account (optional, for cloud database)
-
-## Installation Steps
-
-### 1. Clone the Repository
-```bash
-git clone <repository-url>
-cd NGOLogisticsD
+## 8. Frontend (dev)
+cd ~/Dev/NGOL-D/App && npm install && npm run dev
