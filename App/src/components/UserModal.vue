@@ -67,6 +67,18 @@
           <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
           <button type="submit" class="btn btn-primary">Save</button>
         </div>
+<div class="form-group">
+<label for="mobile">Mobile *</label>
+<input id="mobile" v-model="formData.mobile" type="tel" required placeholder="e.g. +254712345678" />
+</div>
+<div class="form-group">
+<label for="whatsapp">WhatsApp</label>
+<input id="whatsapp" v-model="formData.whatsapp" type="tel" placeholder="e.g. +254712345678" />
+</div>
+<div class="form-group">
+<label for="landline">Landline</label>
+<input id="landline" v-model="formData.landline" type="tel" placeholder="e.g. +25420123456" />
+</div>
       </form>
     </div>
   </div>
@@ -83,7 +95,16 @@ export default {
   },
   emits: ['save', 'close'],
   setup(props, { emit }) {
-    const formData = ref({
+const formData = ref({
+firstName: "",
+lastName: "",
+email: "",
+organization: "",
+role: "",
+mobile: "",
+whatsapp: "",
+landline: ""
+})
       firstName: '',
       lastName: '',
       email: '',
@@ -113,7 +134,17 @@ export default {
     }, { immediate: true })
 
     const save = () => {
-      emit('save', {
+emit('save', {
+firstName: formData.value.firstName,
+lastName: formData.value.lastName,
+email: formData.value.email,
+organization: formData.value.organization,
+role: formData.value.role,
+mobile: formData.value.mobile,
+whatsapp: formData.value.whatsapp,
+landline: formData.value.landline,
+id: props.user?.id
+})
         ...formData.value,
         id: props.user?.id
       })
